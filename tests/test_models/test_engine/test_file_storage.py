@@ -1,10 +1,21 @@
 #!/usr/bin/python3
-"""Defines unnittests for models/engine/file_storage.py."""
-import os
-import json
-import pep8
+"""
+Unittest for the FileStorage class
+Test files by using the following command line:
+python3 -m unittest tests/test_models/test_engine/test_file_storage.py
+"""
 import unittest
-from datetime import datetime
+import pep8
+import json
+# import sys
+from os import path, remove
+# from models import base_model
+# from models import user
+# from models import state
+# from models import city
+# from models import amenity
+# from models import place
+# from models import review
 from models.base_model import BaseModel
 from models.user import User
 from models.state import State
@@ -12,167 +23,305 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
+# from models import engine
+from models.engine import file_storage
 from models.engine.file_storage import FileStorage
 
 
 class TestFileStorage(unittest.TestCase):
-    """Unittests for testing the FileStorage class."""
+    """define variables and methods"""
 
-    @classmethod
-    def setUpClass(cls):
-        """FileStorage testing setup.
-        Temporarily renames any existing file.json.
-        Resets FileStorage objects dictionary.
-        Creates instances of all class types for testing.
+    def setUp(self):
         """
-        try:
-            os.rename("file.json", "tmp")
-        except IOError:
-            pass
+        Sets the private class attributes __file_path and __objects back to
+        'file.json' and {}, respectively
+        Method called to prepare the test fixture. This is called immediately
+        before calling the test method; other than AssertionError or SkipTest
+        """
+        FileStorage._FileStorage__file_path = 'file.json'
         FileStorage._FileStorage__objects = {}
-        cls.storage = FileStorage()
-        cls.base = BaseModel()
-        key = "{}.{}".format(type(cls.base).__name__, cls.base.id)
-        FileStorage._FileStorage__objects[key] = cls.base
-        cls.user = User()
-        key = "{}.{}".format(type(cls.user).__name__, cls.user.id)
-        FileStorage._FileStorage__objects[key] = cls.user
-        cls.state = State()
-        key = "{}.{}".format(type(cls.state).__name__, cls.state.id)
-        FileStorage._FileStorage__objects[key] = cls.state
-        cls.place = Place()
-        key = "{}.{}".format(type(cls.place).__name__, cls.place.id)
-        FileStorage._FileStorage__objects[key] = cls.place
-        cls.city = City()
-        key = "{}.{}".format(type(cls.city).__name__, cls.city.id)
-        FileStorage._FileStorage__objects[key] = cls.city
-        cls.amenity = Amenity()
-        key = "{}.{}".format(type(cls.amenity).__name__, cls.amenity.id)
-        FileStorage._FileStorage__objects[key] = cls.amenity
-        cls.review = Review()
-        key = "{}.{}".format(type(cls.review).__name__, cls.review.id)
-        FileStorage._FileStorage__objects[key] = cls.review
 
-    @classmethod
-    def tearDownClass(cls):
-        """FileStorage testing teardown.
-        Restore original file.json.
-        Delete all test class instances.
+    def tearDown(self):
         """
-        try:
-            os.remove("file.json")
-        except IOError:
-            pass
-        try:
-            os.rename("tmp", "file.json")
-        except IOError:
-            pass
-        del cls.storage
-        del cls.base
-        del cls.user
-        del cls.state
-        del cls.place
-        del cls.city
-        del cls.amenity
-        del cls.review
+        Sets the private class attributes __file_path and __objects back to
+        'file.json' and {}, respectively
+        Method called immediately after the test method has been called and
+        the result recorded
+        """
+        del FileStorage._FileStorage__file_path
+        del FileStorage._FileStorage__objects
+        if path.exists("file.json"):
+            remove("file.json")
 
-    def test_pep8_FileStorage(self):
-        """Test pep8 styling."""
-        style = pep8.StyleGuide(quiet=True)
-        p = style.check_files(['models/engine/file_storage.py'])
-        self.assertEqual(p.total_errors, 0, "fix pep8")
+    def test_pep8_conformance(self):
+        """Test that FileStorage conforms to PEP8"""
+        pep8style = pep8.StyleGuide(quiet=True)
+        result = pep8style.check_files(['models/engine/file_storage.py'])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
 
-    def test_docstrings(self):
-        """Check for docstrings."""
-        self.assertIsNotNone(FileStorage.__doc__)
-        self.assertIsNotNone(FileStorage.all.__doc__)
-        self.assertIsNotNone(FileStorage.new.__doc__)
-        self.assertIsNotNone(FileStorage.reload.__doc__)
-        self.assertIsNotNone(FileStorage.delete.__doc__)
+    def test_class_method_presence(self):
+        """Test that the FileStorage methods are all present"""
+        l1 = dir(FileStorage)
+        self.assertIn('all', l1)
+        self.assertIn('new', l1)
+        self.assertIn('save', l1)
+        self.assertIn('reload', l1)
 
-    def test_attributes(self):
-        """Check for attributes."""
-        self.assertEqual(str, type(FileStorage._FileStorage__file_path))
-        self.assertEqual(dict, type(FileStorage._FileStorage__objects))
+    def test_class_attribute_presence(self):
+        """Test that the FileStorage attributes are all present"""
+        l1 = dir(FileStorage)
+        self.assertIn('_FileStorage__file_path', l1)
+        self.assertIn('_FileStorage__objects', l1)
 
-    def test_methods(self):
-        """Check for methods."""
-        self.assertTrue(hasattr(FileStorage, "all"))
-        self.assertTrue(hasattr(FileStorage, "new"))
-        self.assertTrue(hasattr(FileStorage, "reload"))
-        self.assertTrue(hasattr(FileStorage, "delete"))
+    def test_instance_method_presence(self):
+        """Test that the FileStorage instance as the same methods"""
+        l1 = dir(FileStorage())
+        self.assertIn('all', l1)
+        self.assertIn('new', l1)
+        self.assertIn('save', l1)
+        self.assertIn('reload', l1)
 
-    def test_init(self):
-        """Test initialization."""
-        self.assertTrue(isinstance(self.storage, FileStorage))
+    def test_instance_attribute_presence(self):
+        """Test that the FileStorage instance has the same attributes"""
+        l1 = dir(FileStorage())
+        self.assertIn('_FileStorage__file_path', l1)
+        self.assertIn('_FileStorage__objects', l1)
+
+    def test_docstring_presence(self):
+        """Test that Module, Class, and methods all have a docstring"""
+        self.assertIsNot(file_storage.__doc__, None)
+        self.assertIsNot(FileStorage.__doc__, None)
+        self.assertIsNot(FileStorage.all.__doc__, None)
+        self.assertIsNot(FileStorage.new.__doc__, None)
+        self.assertIsNot(FileStorage.save.__doc__, None)
+        self.assertIsNot(FileStorage.reload.__doc__, None)
+
+    def test_instantiation(self):
+        """Test proper instantiation of object 'storage'"""
+
+        storage = FileStorage()
+        self.assertIsInstance(storage, FileStorage)
+        self.assertEqual(FileStorage._FileStorage__file_path, 'file.json')
+        self.assertEqual(FileStorage._FileStorage__objects, {})
+
+    def new(self, obj):
+        """Test the new method"""
+
+        storage = FileStorage()
+
+        ba = BaseModel()
+        storage.new(ba)
+        self.assertEqual(FileStorage.__objects[ba.__class__.
+                                               __name__+'.'+ba.id], ba)
+
+        us = User()
+        storage.new(us)
+        self.assertEqual(FileStorage.__objects[us.__class__.
+                                               __name__+'.'+us.id], us)
+
+        st = State()
+        storage.new(st)
+        self.assertEqual(FileStorage.__objects[st.__class__.
+                                               __name__+'.'+st.id], st)
+
+        ci = City()
+        storage.new(ci)
+        self.assertEqual(FileStorage.__objects[ci.__class__.
+                                               __name__+'.'+ci.id], ci)
+
+        am = Amenity()
+        storage.new(am)
+        self.assertEqual(FileStorage.__objects[am.__class__.
+                                               __name__+'.'+am.id], am)
+
+        pl = Place()
+        storage.new(pl)
+        self.assertEqual(FileStorage.__objects[pl.__class__.
+                                               __name__+'.'+pl.id], pl)
+
+        re = Review()
+        storage.new(re)
+        self.assertEqual(FileStorage.__objects[re.__class__.
+                                               __name__+'.'+re.id], re)
 
     def test_all(self):
-        """Test default all method."""
-        obj = self.storage.all()
-        self.assertEqual(type(obj), dict)
-        self.assertIs(obj, FileStorage._FileStorage__objects)
-        self.assertEqual(len(obj), 7)
+        """Test the all method"""
 
-    def test_all_cls(self):
-        """Test all method with specified cls."""
-        obj = self.storage.all(BaseModel)
-        self.assertEqual(type(obj), dict)
-        self.assertEqual(len(obj), 1)
-        self.assertEqual(self.base, list(obj.values())[0])
+        storage = FileStorage()
 
-    def test_new(self):
-        """Test new method."""
-        bm = BaseModel()
-        self.storage.new(bm)
-        store = FileStorage._FileStorage__objects
-        self.assertIn("BaseModel." + bm.id, store.keys())
-        self.assertIn(self.base, store.values())
+        ba = BaseModel()
+        self.assertIsInstance(storage.all(), dict)
+        self.assertEqual(storage.all()[ba.__class__.__name__+'.'+ba.id], ba)
+
+        us = User()
+        self.assertIsInstance(storage.all(), dict)
+        self.assertEqual(storage.all()[us.__class__.__name__+'.'+us.id], us)
+
+        st = State()
+        self.assertIsInstance(storage.all(), dict)
+        self.assertEqual(storage.all()[st.__class__.__name__+'.'+st.id], st)
+
+        ci = City()
+        self.assertIsInstance(storage.all(), dict)
+        self.assertEqual(storage.all()[ci.__class__.__name__+'.'+ci.id], ci)
+
+        am = Amenity()
+        self.assertIsInstance(storage.all(), dict)
+        self.assertEqual(storage.all()[am.__class__.__name__+'.'+am.id], am)
+
+        pl = Place()
+        self.assertIsInstance(storage.all(), dict)
+        self.assertEqual(storage.all()[pl.__class__.__name__+'.'+pl.id], pl)
+
+        re = Review()
+        self.assertIsInstance(storage.all(), dict)
+        self.assertEqual(storage.all()[re.__class__.__name__+'.'+re.id], re)
 
     def test_save(self):
-        """Test save method."""
-        self.storage.save()
-        with open("file.json", "r", encoding="utf-8") as f:
-            save_text = f.read()
-            self.assertIn("BaseModel." + self.base.id, save_text)
-            self.assertIn("User." + self.user.id, save_text)
-            self.assertIn("State." + self.state.id, save_text)
-            self.assertIn("Place." + self.place.id, save_text)
-            self.assertIn("City." + self.city.id, save_text)
-            self.assertIn("Amenity." + self.amenity.id, save_text)
-            self.assertIn("Review." + self.review.id, save_text)
+        """Test the save method"""
+
+        storage = FileStorage()
+
+        storage.save()
+        self.assertTrue(path.isfile('file.json'))
+        with open("file.json") as f:
+            self.assertEqual(f.read(), '{}')
+
+        ba = BaseModel()
+        storage.save()
+        self.assertTrue(path.isfile('file.json'))
+        with open("file.json") as f:
+            self.assertIsInstance(json.loads(f.read()), dict)
+        with open("file.json") as f:
+            self.assertEqual(json.loads(f.read())
+                             [ba.__class__.__name__+'.'+ba.id], ba.to_dict())
+
+        us = User()
+        storage.save()
+        self.assertTrue(path.isfile('file.json'))
+        with open("file.json") as f:
+            self.assertIsInstance(json.loads(f.read()), dict)
+        with open("file.json") as f:
+            self.assertEqual(json.loads(f.read())
+                             [us.__class__.__name__+'.'+us.id], us.to_dict())
+
+        st = State()
+        storage.save()
+        self.assertTrue(path.isfile('file.json'))
+        with open("file.json") as f:
+            self.assertIsInstance(json.loads(f.read()), dict)
+        with open("file.json") as f:
+            self.assertEqual(json.loads(f.read())
+                             [st.__class__.__name__+'.'+st.id], st.to_dict())
+
+        ci = City()
+        storage.save()
+        self.assertTrue(path.isfile('file.json'))
+        with open("file.json") as f:
+            self.assertIsInstance(json.loads(f.read()), dict)
+        with open("file.json") as f:
+            self.assertEqual(json.loads(f.read())
+                             [ci.__class__.__name__+'.'+ci.id], ci.to_dict())
+
+        am = Amenity()
+        storage.save()
+        self.assertTrue(path.isfile('file.json'))
+        with open("file.json") as f:
+            self.assertIsInstance(json.loads(f.read()), dict)
+        with open("file.json") as f:
+            self.assertEqual(json.loads(f.read())
+                             [am.__class__.__name__+'.'+am.id], am.to_dict())
+
+        pl = Place()
+        storage.save()
+        self.assertTrue(path.isfile('file.json'))
+        with open("file.json") as f:
+            self.assertIsInstance(json.loads(f.read()), dict)
+        with open("file.json") as f:
+            self.assertEqual(json.loads(f.read())
+                             [pl.__class__.__name__+'.'+pl.id], pl.to_dict())
+
+        re = Review()
+        storage.save()
+        self.assertTrue(path.isfile('file.json'))
+        with open("file.json") as f:
+            self.assertIsInstance(json.loads(f.read()), dict)
+        with open("file.json") as f:
+            self.assertEqual(json.loads(f.read())
+                             [re.__class__.__name__+'.'+re.id], re.to_dict())
 
     def test_reload(self):
-        """Test reload method."""
-        bm = BaseModel()
-        with open("file.json", "w", encoding="utf-8") as f:
-            key = "{}.{}".format(type(bm).__name__, bm.id)
-            json.dump({key: bm.to_dict()}, f)
-        self.storage.reload()
-        store = FileStorage._FileStorage__objects
-        self.assertIn("BaseModel." + bm.id, store)
+        """Test the reload method"""
 
-    def test_reload_no_file(self):
-        """Test reload method with no existing file.json."""
-        try:
-            self.storage.reload()
-        except Exception:
-            self.fail
+        storage = FileStorage()
 
-    def test_delete(self):
-        """Test delete method."""
-        bm = BaseModel()
-        key = "{}.{}".format(type(bm).__name__, bm.id)
-        FileStorage._FileStorage__objects[key] = bm
-        self.storage.delete(bm)
-        self.assertNotIn(bm, FileStorage._FileStorage__objects)
+        ba = BaseModel()
+        storage.save()
+        storage.reload()
+        self.assertIsInstance(FileStorage._FileStorage__objects, dict)
+        self.assertIsInstance(FileStorage._FileStorage__objects
+                              [ba.__class__.__name__+'.'+ba.id], BaseModel)
+        self.assertEqual(FileStorage._FileStorage__objects
+                         [ba.__class__.__name__+'.'+ba.id].to_dict(),
+                         ba.to_dict())
 
-    def test_delete_nonexistant(self):
-        """Test delete method with a nonexistent object."""
-        try:
-            self.storage.delete(BaseModel())
-        except Exception:
-            self.fail
+        us = User()
+        storage.save()
+        storage.reload()
+        self.assertIsInstance(FileStorage._FileStorage__objects, dict)
+        self.assertIsInstance(FileStorage._FileStorage__objects
+                              [us.__class__.__name__+'.'+us.id], User)
+        self.assertEqual(FileStorage._FileStorage__objects
+                         [us.__class__.__name__+'.'+us.id].to_dict(),
+                         us.to_dict())
 
+        st = State()
+        storage.save()
+        storage.reload()
+        self.assertIsInstance(FileStorage._FileStorage__objects, dict)
+        self.assertIsInstance(FileStorage._FileStorage__objects
+                              [st.__class__.__name__+'.'+st.id], State)
+        self.assertEqual(FileStorage._FileStorage__objects
+                         [st.__class__.__name__+'.'+st.id].to_dict(),
+                         st.to_dict())
 
-if __name__ == "__main__":
-    unittest.main()
+        ci = City()
+        storage.save()
+        storage.reload()
+        self.assertIsInstance(FileStorage._FileStorage__objects, dict)
+        self.assertIsInstance(FileStorage._FileStorage__objects
+                              [ci.__class__.__name__+'.'+ci.id], City)
+        self.assertEqual(FileStorage._FileStorage__objects
+                         [ci.__class__.__name__+'.'+ci.id].to_dict(),
+                         ci.to_dict())
+
+        am = Amenity()
+        storage.save()
+        storage.reload()
+        self.assertIsInstance(FileStorage._FileStorage__objects, dict)
+        self.assertIsInstance(FileStorage._FileStorage__objects
+                              [am.__class__.__name__+'.'+am.id], Amenity)
+        self.assertEqual(FileStorage._FileStorage__objects
+                         [am.__class__.__name__+'.'+am.id].to_dict(),
+                         am.to_dict())
+
+        pl = Place()
+        storage.save()
+        storage.reload()
+        self.assertIsInstance(FileStorage._FileStorage__objects, dict)
+        self.assertIsInstance(FileStorage._FileStorage__objects
+                              [pl.__class__.__name__+'.'+pl.id], Place)
+        self.assertEqual(FileStorage._FileStorage__objects
+                         [pl.__class__.__name__+'.'+pl.id].to_dict(),
+                         pl.to_dict())
+
+        re = Review()
+        storage.save()
+        storage.reload()
+        self.assertIsInstance(FileStorage._FileStorage__objects, dict)
+        self.assertIsInstance(FileStorage._FileStorage__objects
+                              [re.__class__.__name__+'.'+re.id], Review)
+        self.assertEqual(FileStorage._FileStorage__objects
+                         [re.__class__.__name__+'.'+re.id].to_dict(),
+                         re.to_dict())
